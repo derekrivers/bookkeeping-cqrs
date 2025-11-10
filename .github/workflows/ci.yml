@@ -39,12 +39,18 @@ jobs:
           gem install bundler
           bundle install --jobs 4 --retry 3
 
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
+            echo "Waiting for Postgres..."
+            sleep 1
+          done
+
       - name: Set up database
         env:
           RAILS_ENV: test
         run: |
-          bin/rails db:create
-          bin/rails db:schema:load
+          bin/rails db:prepare
 
       - name: Run tests if they exist
         env:
