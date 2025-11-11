@@ -2,9 +2,9 @@ name: Rails CI
 
 on:
   push:
-    branches: [ main, project-setup ]
+    branches: [ main, build-iteration-one ]
   pull_request:
-    branches: [ main, project-setup ]
+    branches: [ main, build-iteration-one ]
 
 jobs:
   build:
