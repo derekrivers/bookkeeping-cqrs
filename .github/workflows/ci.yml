@@ -2,16 +2,16 @@ name: Rails CI
 
 on:
   push:
-    branches: [ main, project-setup ]
+    branches: [ main, build-iteration-one ]
   pull_request:
-    branches: [ main, project-setup ]
+    branches: [ main, build-iteration-one ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
+      db:
         image: postgres:15
         ports:
           - 5432:5432
@@ -39,19 +39,36 @@ jobs:
           gem install bundler
           bundle install --jobs 4 --retry 3
 
+      - name: Make bin scripts executable
+        run: chmod +x bin/rails bin/rake bin/setup
+      
+      - name: Show Postgres logs
+        run: |
+          echo "Postgres service logs:"
+          docker logs ${{ job.services.db.id }} || echo "Could not get logs"
+
       - name: Wait for Postgres
         run: |
-          until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
-            echo "Waiting for Postgres..."
-            sleep 1
+          echo "Waiting for Postgres..."
+          max_attempts=40
+          attempt=1
+          until pg_isready -h db -p 5432 -U postgres; do
+            if [ $attempt -ge $max_attempts ]; then
+              echo "Postgres never started"
+              docker logs ${{ job.services.db.id }}
+              exit 1
+            fi
+            echo "Still waiting... ($attempt/$max_attempts)"
+            attempt=$((attempt+1))
+            sleep 3
           done
+          echo "Postgres is ready!"
 
-      - name: Set up database
+      - name: Prepare database
         env:
           RAILS_ENV: test
         run: |
           bin/rails db:prepare
-
       - name: Run tests if they exist
         env:
           RAILS_ENV: test
