@@ -13,10 +13,17 @@ jobs:
     services:
       db:
         image: postgres:15
+        ports:
+          - 5432:5432
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: bookkeeping_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -40,16 +47,15 @@ jobs:
           echo "Postgres service logs:"
           docker logs ${{ job.services.db.id }} || echo "Could not get logs"
 
-      - name: Wait for Postgres and prepare DB
-        env:
-          RAILS_ENV: test
+      - name: Wait for Postgres
         run: |
           echo "Waiting for Postgres..."
           max_attempts=40
           attempt=1
           until pg_isready -h db -p 5432 -U postgres; do
             if [ $attempt -ge $max_attempts ]; then
-              echo "Postgres did not become ready in time, exiting."
+              echo "Postgres never started"
+              docker logs ${{ job.services.db.id }}
               exit 1
             fi
             echo "Still waiting... ($attempt/$max_attempts)"
@@ -57,9 +63,12 @@ jobs:
             sleep 3
           done
           echo "Postgres is ready!"
-          echo "Preparing database..."
-          bin/rails db:prepare
 
+      - name: Prepare database
+        env:
+          RAILS_ENV: test
+        run: |
+          bin/rails db:prepare
       - name: Run tests if they exist
         env:
           RAILS_ENV: test
