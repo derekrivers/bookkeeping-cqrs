@@ -2,12 +2,15 @@ name: Rails CI
 
 on:
   push:
-    branches: [ main, build-iteration-one ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ main, build-iteration-one ]
+    branches:
+      - '**'
 
 jobs:
-  build:
+  test:
+    name: Rails CI - Tests
     runs-on: ubuntu-latest
 
     services:
