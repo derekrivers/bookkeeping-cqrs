@@ -2,16 +2,19 @@ name: Rails CI
 
 on:
   push:
-    branches: [ main, project-setup ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ main, project-setup ]
+    branches:
+      - '**'
 
 jobs:
-  build:
+  test:
+    name: Rails CI - Tests
     runs-on: ubuntu-latest
 
     services:
-      postgres:
+      db:
         image: postgres:15
         ports:
           - 5432:5432
@@ -20,37 +23,48 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: bookkeeping_test
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Install Postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client libpq-dev
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.4
+          bundler-cache: true
 
-      - name: Install dependencies
-        run: |
-          gem install bundler
-          bundle install --jobs 4 --retry 3
+      - name: Make bin scripts executable
+        run: chmod +x bin/rails bin/rake bin/setup
 
       - name: Wait for Postgres
         run: |
-          until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
-            echo "Waiting for Postgres..."
-            sleep 1
+          echo "Waiting for Postgres..."
+          max_attempts=40
+          attempt=1
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            if [ $attempt -ge $max_attempts ]; then
+              echo "Postgres never started"
+              exit 1
+            fi
+            echo "Still waiting... ($attempt/$max_attempts)"
+            attempt=$((attempt+1))
+            sleep 3
           done
+          echo "Postgres is ready!"
 
-      - name: Set up database
+      - name: Prepare database
         env:
           RAILS_ENV: test
-        run: |
-          bin/rails db:prepare
+          DATABASE_HOST: localhost
+        run: bin/rails db:prepare
 
       - name: Run tests if they exist
         env:
@@ -59,5 +73,5 @@ jobs:
           if [ -d "spec" ]; then
             bundle exec rspec
           else
-            echo "No tests found, skipping RSpec."
+            echo "No tests found, skipping."
           fi
