@@ -20,42 +20,35 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: bookkeeping_test
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Install Postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client libpq-dev
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.4
-
-      - name: Install dependencies
-        run: |
-          gem install bundler
-          bundle install --jobs 4 --retry 3
+          bundler-cache: true
 
       - name: Make bin scripts executable
         run: chmod +x bin/rails bin/rake bin/setup
-      
-      - name: Show Postgres logs
-        run: |
-          echo "Postgres service logs:"
-          docker logs ${{ job.services.db.id }} || echo "Could not get logs"
 
       - name: Wait for Postgres
         run: |
           echo "Waiting for Postgres..."
           max_attempts=40
           attempt=1
-          until pg_isready -h db -p 5432 -U postgres; do
+          until pg_isready -h localhost -p 5432 -U postgres; do
             if [ $attempt -ge $max_attempts ]; then
               echo "Postgres never started"
-              docker logs ${{ job.services.db.id }}
               exit 1
             fi
             echo "Still waiting... ($attempt/$max_attempts)"
@@ -67,8 +60,8 @@ jobs:
       - name: Prepare database
         env:
           RAILS_ENV: test
-        run: |
-          bin/rails db:prepare
+        run: bin/rails db:prepare
+
       - name: Run tests if they exist
         env:
           RAILS_ENV: test
@@ -76,5 +69,5 @@ jobs:
           if [ -d "spec" ]; then
             bundle exec rspec
           else
-            echo "No tests found, skipping RSpec."
+            echo "No tests found, skipping."
           fi

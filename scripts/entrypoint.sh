@@ -2,7 +2,16 @@
 set -e
 
 echo "Waiting for PostgreSQL..."
-until pg_isready -h db -p 5432; do
+max_attempts=20
+attempt=1
+
+until pg_isready -h db -p 5432 -U postgres; do
+  if [ $attempt -ge $max_attempts ]; then
+    echo "Postgres did not become ready in time, exiting."
+    exit 1
+  fi
+  echo "Still waiting... ($attempt/$max_attempts)"
+  attempt=$((attempt+1))
   sleep 2
 done
 
