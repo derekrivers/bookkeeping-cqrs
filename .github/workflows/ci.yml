@@ -60,6 +60,7 @@ jobs:
       - name: Prepare database
         env:
           RAILS_ENV: test
+          DATABASE_HOST: localhost
         run: bin/rails db:prepare
 
       - name: Run tests if they exist
