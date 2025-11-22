@@ -18,5 +18,8 @@ done
 echo "Database ready, running migrations..."
 bin/rails db:create db:migrate
 
+# ✅ FIX: remove stale PID file that survives volume mounts
+rm -f tmp/pids/server.pid
+
 echo "Starting Rails server..."
 exec bin/rails server -b 0.0.0.0

@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-    entrypoint: ["bash", "scripts/entrypoint.sh"]
+    entrypoint: ["bash", "script/entrypoint.sh"]
     command: []
     volumes:
       - .:/rails
