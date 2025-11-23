@@ -56,17 +56,265 @@ Rails applications.
 ---
 
 ## 🛠 Setup
+## 🚀 Requirements
+
+* Docker Desktop
+* Git
+* Bash (WSL, Git Bash, Linux, macOS)
+
+No local Ruby or PostgreSQL installation required.
+
+---
+
+## 🧰 First Time Setup
+
+Clone the repository:
 
 ```bash
-# Clone the repo
-git clone git@github.com:derekrivers/bookkeeping-cqrs.git
-cd bookkeeping-cqrs
+git clone <repo>
+cd <repo>
+```
 
-# Install dependencies
-bundle install
+Ensure Docker is running, then start the environment:
 
-# Create and migrate the database
-rails db:create db:migrate
+```bash
+./scripts/start.sh --clean
+```
 
-# Run the test suite
+This will:
+
+* build Docker images
+* create the database
+* run migrations
+* start the Rails server
+* stream logs
+
+Once running, open:
+
+```
+http://localhost:3000
+```
+
+---
+
+## 🧪 Development Scripts
+
+This project includes helper scripts to make working with Docker and the Rails app easier during development.
+
+---
+
+### `scripts/start.sh`
+
+Used for running the Rails server inside Docker and viewing logs and incoming requests.
+
+#### Usage
+
+```bash
+./scripts/start.sh
+```
+
+Starts the server and streams logs (similar to `docker compose up`), allowing you to see requests as they come in.
+
+#### Clean Start
+
+```bash
+./scripts/start.sh --clean
+```
+
+This will:
+
+* stop and remove all containers and volumes
+* rebuild images
+* start the server
+* stream logs
+
+Use this when:
+
+* dependencies or images have changed
+* you want a clean environment
+
+#### Restart Without Cleanup
+
+```bash
+./scripts/start.sh --go
+```
+
+Restarts the server without tearing anything down.
+
+Use this for fast restarts during development.
+
+---
+
+### `scripts/test.sh`
+
+Used for running the application environment and manually executing tests inside the container.
+
+#### Usage
+
+```bash
+./scripts/test.sh
+```
+
+Starts the database and app container, then opens a bash session inside the app container.
+
+You can then run:
+
+```bash
 bundle exec rspec
+rails console
+bin/rails db
+```
+
+#### Clean Reset
+
+```bash
+./scripts/test.sh --clean
+```
+
+This will:
+
+* stop and remove containers
+* remove Docker volumes (including the database)
+* rebuild images
+* recreate and migrate the database
+* open a bash session inside the app container
+
+Use this when:
+
+* migrations have changed
+* the database becomes inconsistent
+* you want a fully fresh environment
+
+---
+
+### 🧭 Script Summary
+
+| Command                      | Action                               |
+| ---------------------------- | ------------------------------------ |
+| `./scripts/start.sh`         | Start server + stream logs           |
+| `./scripts/start.sh --clean` | Full teardown + rebuild + run server |
+| `./scripts/start.sh --go`    | Restart server only                  |
+| `./scripts/test.sh`          | Start environment + open bash        |
+| `./scripts/test.sh --clean`  | Full teardown + rebuild + bash       |
+
+---
+
+## ✅ Running Tests
+
+To enter the container and run tests manually:
+
+```bash
+./scripts/test.sh
+```
+
+Then inside the container:
+
+```bash
+bundle exec rspec
+```
+
+---
+
+## 🐛 Common Issues (Windows / Docker)
+
+### 🔹 "A server is already running"
+
+Cause: a stale PID file
+
+Fix:
+
+```bash
+rm -f tmp/pids/server.pid
+./scripts/start.sh
+```
+
+`entrypoint.sh` also removes this automatically.
+
+---
+
+### 🔹 Database already exists / migrations not applying
+
+Run:
+
+```bash
+./scripts/test.sh --clean
+```
+
+---
+
+### 🔹 CRLF line ending warnings
+
+Example:
+
+```
+warning: CRLF will be replaced by LF
+```
+
+Fix:
+
+```bash
+git config --global core.autocrlf input
+git add --renormalize .
+git commit -m "Normalize line endings"
+```
+
+Also set VS Code to `LF`.
+
+---
+
+### 🔹 Permission denied when running scripts
+
+```bash
+chmod +x scripts/*.sh
+```
+
+---
+
+### 🔹 PostgreSQL connection errors
+
+If you see:
+
+```
+could not connect to server: Connection refused
+```
+
+The DB may still be starting.
+
+Fix:
+
+```bash
+./scripts/start.sh --go
+```
+
+or retry after a few seconds.
+
+---
+
+If issues persist, reset everything:
+
+```bash
+./scripts/test.sh --clean
+```
+
+---
+
+## ✅ Development Workflow (recommended)
+
+Typical loop:
+
+```
+edit code
+./scripts/start.sh --go
+check logs / browser
+./scripts/test.sh
+run rspec
+repeat
+```
+
+This keeps development fast and isolated within Docker.
+
+---
+
+## 📄 License
+
+MIT
