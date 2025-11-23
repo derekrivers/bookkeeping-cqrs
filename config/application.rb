@@ -12,7 +12,11 @@ require "action_mailbox/engine"
 require "action_text/engine"
 require "action_view/railtie"
 require "action_cable/engine"
-# require "rails/test_unit/railtie"
+
+require_relative "../app/lib/container"
+require_relative "../app/lib/command_bus/bus"
+require_relative "../app/lib/command_bus/middleware/logging_middleware"
+
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -30,6 +34,7 @@ module Bookkeeping
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
+    # config.autoload_paths << Rails.root.join("app")
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
