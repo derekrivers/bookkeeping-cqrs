@@ -21,10 +21,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_11_185514) do
     t.string "event_type", null: false
     t.binary "metadata"
     t.datetime "valid_at"
-    t.index ["created_at"], name: "index_event_store_events_on_created_at"
-    t.index ["event_id"], name: "index_event_store_events_on_event_id", unique: true
-    t.index ["event_type"], name: "index_event_store_events_on_event_type"
-    t.index ["valid_at"], name: "index_event_store_events_on_valid_at"
   end
 
   create_table "event_store_events_in_streams", force: :cascade do |t|
@@ -37,6 +33,4 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_11_185514) do
     t.index ["stream", "event_id"], name: "index_event_store_events_in_streams_on_stream_and_event_id", unique: true
     t.index ["stream", "position"], name: "index_event_store_events_in_streams_on_stream_and_position", unique: true
   end
-
-  add_foreign_key "event_store_events_in_streams", "event_store_events", column: "event_id", primary_key: "event_id"
 end
