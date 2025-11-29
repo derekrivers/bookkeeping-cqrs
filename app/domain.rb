@@ -1,2 +1,1 @@
-module Domain
-end
+module Domain;end
