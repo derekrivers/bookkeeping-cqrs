@@ -1,2 +1,1 @@
-module Business
-end
+module Domain::Business;end
