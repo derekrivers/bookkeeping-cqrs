@@ -1,3 +1,5 @@
+require "rails_event_store"
+
 module Domain
   module Business
     module Events
