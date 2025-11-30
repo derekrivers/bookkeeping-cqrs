@@ -1,3 +1,5 @@
+require_relative "../aggregate"
+
 module Domain
   module Business
     module Handlers
