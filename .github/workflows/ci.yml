@@ -69,6 +69,7 @@ jobs:
       - name: Run tests if they exist
         env:
           RAILS_ENV: test
+          DATABASE_HOST: localhost
         run: |
           if [ -d "spec" ]; then
             bundle exec rspec
