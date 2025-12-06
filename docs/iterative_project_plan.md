@@ -34,7 +34,7 @@ This document captures the revised, incremental plan for the **Bookkeeping CQRS*
 **Tasks:**
 - Implement a `LedgerEntriesProjection` (projector) that consumes `TransactionRecorded` and writes to `ledger_entries`/read tables.
 - Create read models for account balances and ledger view.
-- Add GET endpoints, e.g. `GET /api/businesses/:id/ledger_accounts` and `GET /api/businesses/:id/ledger_entries`.
+- Add GET endpoints, e.g. `GET /api/business/:id/ledger_accounts` and `GET /api/business/:id/ledger_entries`.
 - Add integration tests covering the command → event → projection → query round-trip.
 
 **Deliverable:** Full CQRS round-trip working end-to-end.
@@ -51,7 +51,7 @@ This document captures the revised, incremental plan for the **Bookkeeping CQRS*
 - Implement `Artefact` creation (draft) with line items (value objects).
 - Expose API endpoints for business/contact/artefact creation.
 
-**Deliverable:** Businesses, contacts, and artefacts can be created via API and persisted as events.
+**Deliverable:** Business, contacts, and artefacts can be created via API and persisted as events.
 
 ---
 
