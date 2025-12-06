@@ -14,19 +14,19 @@ for arg in "$@"; do
 done
 
 if [ "$CLEAN" = true ]; then
-  echo "🚨 CLEAN mode: removing containers, volumes, and DB..."
+  echo "[CLEAN] removing containers, volumes, and DB..."
 
   docker compose down -v --remove-orphans
   docker compose build
 
-  echo "🚀 Starting containers..."
+  echo "[BOOT] Starting containers..."
   docker compose up -d
 else
-  echo "🚀 Starting containers (no clean)..."
+  echo "[BOOT] Starting containers (no clean)..."
   docker compose up -d
 fi
 
-echo "⏳ Waiting for PostgreSQL..."
+echo "[WAIT] Waiting for PostgreSQL..."
 docker compose exec db bash -c "
   max_attempts=20
   attempt=1
@@ -42,11 +42,11 @@ docker compose exec db bash -c "
 "
 
 if [ "$CLEAN" = true ]; then
-  echo "🗑 Dropping & recreating DB..."
-  docker compose exec app bash -c "bin/rails db:reset"
+  echo "[DB] Dropping & recreating DB (RAILS_ENV=test)..."
+  docker compose exec -e RAILS_ENV=test app bash -c "bin/rails db:reset"
 fi
 
-echo "✅ Environment ready"
+echo "[OK] Environment ready"
 
-echo "🐚 Opening shell in app container..."
-docker compose exec app bash
+echo "[SHELL] Opening shell in app container (RAILS_ENV=test)..."
+docker compose exec -e RAILS_ENV=test app bash -c "export RAILS_ENV=test; exec bash"
