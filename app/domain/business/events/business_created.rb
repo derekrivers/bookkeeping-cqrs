@@ -16,6 +16,10 @@ module Domain
           data[:country]
         end
 
+        def main_address
+          data[:main_address]
+        end
+
         def owner_user_id
           data[:owner_user_id]
         end

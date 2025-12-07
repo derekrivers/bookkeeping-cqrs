@@ -3,8 +3,12 @@ Rails.application.config.to_prepare do
     Rails.configuration.event_store
   end
 
+  App.register(:repository, singleton: true) do
+    AggregateRoot::Repository.new(App.resolve(:event_store))
+  end
+
   App.register(:business_command_handler, singleton: true) do
-    Domain::Business::Handlers::BusinessCommandHandler.new(App.resolve(:event_store))
+    Domain::Business::Handlers::BusinessCommandHandler.new(App.resolve(:repository))
   end
 
   App.register(:command_bus, singleton: true) do

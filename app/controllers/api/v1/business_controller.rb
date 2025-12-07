@@ -18,7 +18,8 @@ module Api
             business_id: event.business_id,
             name: event.name,
             country: event.country,
-            owner_user_id: event.owner_user_id
+            owner_user_id: event.owner_user_id,
+            main_address: event.main_address
           }, status: :ok
         end
       rescue ActionController::ParameterMissing => e
@@ -26,7 +27,7 @@ module Api
       end
 
       def create
-        attrs = require_params(:business_id, :name, :country, :owner_user_id)
+        attrs = require_params(:business_id, :name, :country, :owner_user_id, :address)
 
         command = Domain::Business::Commands::CreateBusiness.new(**attrs)
 

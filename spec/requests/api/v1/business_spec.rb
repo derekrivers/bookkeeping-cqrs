@@ -14,7 +14,14 @@ RSpec.describe "Business API V1", type: :request do
              business_id: business_id,
              name: "Test Business",
              country: "GB",
-             owner_user_id: "owner-1"
+             owner_user_id: "owner-1",
+             address: {
+               line1: "221B Baker Street",
+               line2: "Flat B",
+               city: "London",
+               postcode: "NW1 6XE",
+               country_code: "GB"
+             }
            }.to_json,
            headers: { "CONTENT_TYPE" => "application/json" }
 
@@ -32,6 +39,14 @@ RSpec.describe "Business API V1", type: :request do
       expect(event.name).to eq("Test Business")
       expect(event.country).to eq("GB")
       expect(event.owner_user_id).to eq("owner-1")
+      expect(event.main_address.to_unsafe_h).to include(
+        "line1" => "221B Baker Street",
+        "line2" => "Flat B",
+        "city" => "London",
+        "postcode" => "NW1 6XE",
+        "country_code" => "GB"
+      )
+      expect(event.main_address).to have_key("id")
     end
 
     it "returns an error when required params are missing" do
@@ -55,7 +70,14 @@ RSpec.describe "Business API V1", type: :request do
           business_id: business_id,
           name: "Existing Business",
           country: "US",
-          owner_user_id: "owner-2"
+          owner_user_id: "owner-2",
+          address: {
+            line1: "123 Main St",
+            line2: "Suite 4",
+            city: "Metropolis",
+            postcode: "12345",
+            country_code: "US"
+          }
         )
       )
 
@@ -64,12 +86,20 @@ RSpec.describe "Business API V1", type: :request do
       expect(response).to have_http_status(:ok)
 
       body = JSON.parse(response.body)
-      expect(body).to eq(
+      expect(body).to include(
         "business_id" => business_id,
         "name" => "Existing Business",
         "country" => "US",
         "owner_user_id" => "owner-2"
       )
+      expect(body["main_address"]).to include(
+        "line1" => "123 Main St",
+        "line2" => "Suite 4",
+        "city" => "Metropolis",
+        "postcode" => "12345",
+        "country_code" => "US"
+      )
+      expect(body["main_address"]["id"]).to be_a(String)
     end
 
     it "returns not found when no business stream exists" do
