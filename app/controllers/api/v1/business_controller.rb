@@ -4,23 +4,15 @@ module Api
       def show
         business_id = params.require(:id)
 
-        event = event_store
-          .read
-          .stream(business_stream(business_id))
-          .limit(1)
-          .backward
-          .first
+        aggregate = repository.load(
+          Domain::Business::Aggregate,
+          business_id
+        )
 
-        if event.nil?
+        if aggregate.nil?
           render_error("Business not found", status: :not_found)
         else
-          render json: {
-            business_id: event.business_id,
-            name: event.name,
-            country: event.country,
-            owner_user_id: event.owner_user_id,
-            main_address: event.main_address
-          }, status: :ok
+          render json: aggregate.to_h, status: :ok
         end
       rescue ActionController::ParameterMissing => e
         render_error(e.message)

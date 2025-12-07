@@ -10,6 +10,10 @@ module Api
       App.resolve(:event_store)
     end
 
+    def repository
+      App.resolve(:repository)
+    end
+
     # Optional shared error rendering
     def render_error(message, status: :unprocessable_entity)
       render json: { error: message }, status: status
