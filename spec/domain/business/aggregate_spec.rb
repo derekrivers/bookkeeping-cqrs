@@ -54,7 +54,7 @@ RSpec.describe Domain::Business::Aggregate do
           owner_user_id: "owner-456",
           main_address: main_address.merge(id: "addr-999")
         )
-      end.to raise_error("Already created")
+      end.to raise_error(Domain::Business::Errors::BusinessAlreadyExists)
     end
   end
 end
