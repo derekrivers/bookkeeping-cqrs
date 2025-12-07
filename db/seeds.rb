@@ -12,7 +12,14 @@ if event_store.read.stream(stream).limit(1).to_a.empty?
       business_id: default_business_id,
       name: "Acme Corp",
       country: "US",
-      owner_user_id: ENV.fetch("SEED_OWNER_USER_ID", "seed-owner")
+      owner_user_id: ENV.fetch("SEED_OWNER_USER_ID", "seed-owner"),
+      address: {
+        line1: "21 Browning St",
+        line2: "Easington Colliery",
+        city: "Durham",
+        postcode: "SR83RY",
+        country_code: "GB"
+      }
     )
   )
   puts "Seeded business #{default_business_id}"

@@ -7,13 +7,27 @@ RSpec.describe Domain::Business::Commands::CreateBusiness do
         business_id: "biz-123",
         name: "Acme Corp",
         country: "US",
-        owner_user_id: "owner-123"
+        owner_user_id: "owner-123",
+        address: {
+          line1: "221B Baker Street",
+          line2: "Flat B",
+          city: "London",
+          postcode: "NW1 6XE",
+          country_code: "GB"
+        }
       )
 
       expect(command.business_id).to eq("biz-123")
       expect(command.name).to eq("Acme Corp")
       expect(command.country).to eq("US")
       expect(command.owner_user_id).to eq("owner-123")
+      expect(command.address).to include(
+        line1: "221B Baker Street",
+        line2: "Flat B",
+        city: "London",
+        postcode: "NW1 6XE",
+        country_code: "GB"
+      )
     end
   end
 end
