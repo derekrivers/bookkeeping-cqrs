@@ -21,5 +21,9 @@ module Api
         hash[key] = params.require(key)
       end
     end
+
+    rescue_from Domain::Business::Errors::BusinessAlreadyExists do |e|
+      render_error(e.message, 409)
+    end
   end
 end

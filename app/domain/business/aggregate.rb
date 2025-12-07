@@ -12,7 +12,7 @@ module Domain
       end
 
       def create(name:, country:, owner_user_id:, main_address:)
-        raise "Already created" if @created
+        raise Domain::Business::Errors::BusinessAlreadyExists if @created
 
         apply Domain::Business::Events::BusinessCreated.new(
           data: {
