@@ -39,14 +39,14 @@ RSpec.describe "Business API V1", type: :request do
       expect(event.name).to eq("Test Business")
       expect(event.country).to eq("GB")
       expect(event.owner_user_id).to eq("owner-1")
-      expect(event.main_address.to_unsafe_h).to include(
-        "line1" => "221B Baker Street",
-        "line2" => "Flat B",
-        "city" => "London",
-        "postcode" => "NW1 6XE",
-        "country_code" => "GB"
+      expect(event.main_address).to include(
+        line1: "221B Baker Street",
+        line2: "Flat B",
+        city: "London",
+        postcode: "NW1 6XE",
+        country_code: "GB"
       )
-      expect(event.main_address).to have_key("id")
+      expect(event.main_address).to have_key(:id)
     end
 
     it "returns an error when required params are missing" do

@@ -11,11 +11,12 @@ module Domain
         def call(command)
           main_address_id = SecureRandom.uuid
           business = Domain::Business::Aggregate.new(command.business_id)
+          address_attrs = command.address.to_h.symbolize_keys
 
           business.create(
             name: command.name,
             country: command.country,
-            main_address: command.address.merge(id: main_address_id),
+            main_address: address_attrs.merge(id: main_address_id),
             owner_user_id: command.owner_user_id
           )
 
